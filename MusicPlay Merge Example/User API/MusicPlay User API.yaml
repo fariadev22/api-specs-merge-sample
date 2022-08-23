@@ -1,0 +1,480 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: MusicPlay User API
+  description: Helps manage user accounts on the MusicPlay application.
+servers:
+  - url: https://musicplay.io/api/v1/users
+security:
+  - oauth2: []
+paths:
+  /:
+    get:
+      summary: Get all users.
+      operationId: getAllUsers
+      security:
+        - oauth2: ["read:user"]
+      tags:
+        - users
+        - internal
+      responses:
+        '200':
+          description: User profile object.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+  /{user-id}:
+    parameters:
+    - $ref: "#/components/parameters/user-id"
+    get:
+      summary: Get user profile.
+      operationId: getUserProfile
+      security:
+        - oauth2: ["read:user"]
+      tags:
+        - user profile
+      responses:
+        '200':
+          description: User profile object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    put:
+      summary: Update user profile.
+      operationId: updateUserProfile
+      security:
+        - oauth2: ["write:user"]
+      tags:
+        - user profile
+      parameters:
+        - name: name
+          in: query
+          description: "Username of the user profile."
+          required: false
+          schema:
+            type: string
+            example: Bob
+        - name: bio
+          in: query
+          description: "Introductory bio of the user."
+          required: false
+          schema:
+            type: string
+            example: I'm a music lover.
+        - name: profilePictureUrl
+          in: query
+          description: "URL for the thumbnail to associate with the user profile."
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Profile updated successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"            
+  /{user-id}/playlists:
+    parameters:
+    - $ref: "#/components/parameters/user-id"
+    get:
+      summary: Get playlists associated with the user account.
+      operationId: getUserPlaylists
+      security:
+        - oauth2: ["read:user"]      
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: List of user playlists objects.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPlaylist"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    post:
+      summary: Add new playlist to user account.
+      operationId: addUserPlaylist
+      security:
+        - oauth2: ["write:user"]      
+      tags:
+        - playlists
+      requestBody:
+        content: 
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserPlaylist'
+      responses:
+        '200':
+          description: User playlist added successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"
+  /playlists/{playlist-id}:
+    parameters:
+    - $ref: "#/components/parameters/playlist-id"
+    get:
+      summary: Get user playlist metadata.
+      operationId: getPlaylist
+      security:
+        - oauth2: ["read:playlist"]      
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Playlist object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/UserPlaylist"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    delete:
+      summary: Delete user playlist.
+      operationId: deletePlaylist
+      security:
+        - oauth2: ["write:playlist"]      
+      tags:
+        - playlists   
+      responses:
+        '200':
+          description: User playlist deleted successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"               
+  /playlists/{playlist-id}/tracks:
+    parameters:
+    - $ref: "#/components/parameters/playlist-id"  
+    get:
+      summary: Get tracks associated with a user playlist.
+      operationId: getPlaylistTracks
+      security:
+        - oauth2: ["read:playlist"]      
+      tags:
+        - playlist tracks
+      responses:
+        '200':
+          description: List of playlist tracks.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPlaylistTrack"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    post:
+      summary: Add new playlist track.
+      operationId: addPlaylistTrack
+      security:
+        - oauth2: ["write:playlist"]          
+      tags:
+        - playlist tracks
+      requestBody:
+        content: 
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserPlaylistTrack'
+      responses:
+        '200':
+          description: User playlist track added successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"             
+  /tracks/{track-id}:
+    parameters:
+    - $ref: "#/components/parameters/track-id"
+    get:
+      summary: Get playlist track.
+      operationId: getUserPlaylistTrack
+      security:
+        - oauth2: ["read:track"]      
+      tags:
+        - playlist tracks
+      responses:
+        '200':
+          description: User playlist track object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/UserPlaylistTrack"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    delete:
+      summary: Delete user playlist track.
+      operationId: deleteUserPlaylistTrack
+      security:
+        - oauth2: ["write:playlist"]          
+      tags:
+        - playlist tracks
+      responses:
+        '200':
+          description: User playlist track deleted successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"                          
+components:
+  parameters:
+    user-id:
+      name: user-id
+      in: path
+      description: Unique id that identifies a user account on MusicPlay application.
+      required: true
+      schema:
+        type: string
+        example: user-6rqhFgbbKwnb9MLmUQDhG6
+    playlist-id:
+      name: playlist-id
+      in: path
+      description: Unique id that identifies a playlist on a user account.
+      required: true
+      schema:
+        type: string
+        example: playlist-2rqhFgbbKwfb9MLmUQDhzY 
+    track-id:
+      name: track-id
+      in: path
+      description: Unique id that identifies a track in an artist's album.
+      required: true
+      schema:
+        type: string
+        example: track-78aclaqhFgbbKwfb9MLmTx
+  responses:
+    defaultResponse:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"   
+  schemas:
+    UserProfile:
+      type: object
+      properties:        
+        id:
+          type: string
+          description: "Unique identifier of the user account."
+          example: user-6rqhFgbbKwnb9MLmUQDhG6
+        name:
+          type: string
+          description: "Name of the user."
+          example: Bob
+        joined:
+          type: string
+          description: "Date and time when user joined MusicPlay."
+          format: date-time
+          example: "2022-08-23T14:01:54.05Z"
+        bio:
+          type: string
+          description: "Introductory bio of the user."
+          example: "I'm a music lover"
+        profilePictureUrl:
+          type: string
+          description: "Absolute URL of the profile thumbnail displayed against the user's account."
+          example: "https://example.com/image.png"
+        playlistsCount:
+          type: number
+          description: "Number of playlists associated with the user account."
+          example: 1
+        playlists:
+          type: array
+          description: "Playlists associated with the user account."
+          items:
+            $ref: "#/components/schemas/UserPlaylist"
+    UserPlaylist:
+      type: object
+      properties:      
+        id:
+          type: string
+          description: "Unique identifier of the playlist added by a user."
+          example: playlist-2rqhFgbbKwfb9MLmUQDhzY
+        name:
+          type: string
+          description: "Name assigned to the playlist by the user."
+          example: Travel Songs
+        description:
+          type: string
+          description: "Any description for the playlist provided by the user."
+          example: Songs to listen while travelling
+        createdBy:
+          type: string
+          description: "Id of the user who created the playlist."
+          example: user-6rqhFgbbKwnb9MLmUQDhG6
+        createdOn:
+          type: string
+          description: "Date and time of when the playlist was created by the user."
+          format: date-time
+          example: "2022-08-24T14:01:54.05Z"
+        tracksCount:
+          type: number
+          description: "Number of tracks inside the playlist."
+          example: 10
+        tracks:
+          type: array
+          description: "Tracks inside the playlist."
+          items:
+            $ref: "#/components/schemas/UserPlaylistTrack"
+        isPublic:
+          type: boolean
+          description: "Whether the playlist is visible to public or not."
+          example: true
+    UserPlaylistTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+          description: "Unique identifier of the user playlist's track."
+          example: track-78aclaqhFgbbKwfb9MLmTx
+        playlistId:
+          type: string
+          description: "Unique identifier of the playlist in which the track exists."
+          example: playlist-2rqhFgbbKwfb9MLmUQDhzY
+        title:
+          type: string
+          description: "Title of the track."
+          example: "What's My Name?"
+        addedBy:
+          type: string
+          description: "Unique identifier of the user who added the track to the playlist."
+          example: user-6rqhFgbbKwnb9MLmUQDhG6
+        addedOn:
+          type: string
+          format: date-time
+          description: "Date and time of when the user added the track to the playlist."
+          example: "2022-08-24T15:01:54.05Z"
+        track:
+          $ref: "#/components/schemas/Track"
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifer of the artist account."
+          example: artist-2xaclaqhGgbbKwfb9MLm0p
+        name:
+          type: string
+          description: "Name of the artist."
+          example: Rihanna
+        bio:
+          type: string
+          description: "Introductory bio of the artist."
+          example: "Robyn Rihanna Fenty NH (born 20 February 1988) is a Barbadian singer, songwriter, actress and businesswoman."
+        albumsCount:
+          type: number
+          description: "Number of albums added by the artist."
+          example: 11
+        albums:
+          type: array
+          description: "Albums added by the artist."
+          items:
+            $ref: "#/components/schemas/Album"
+        profilePictureUrl:
+          type: string
+          description: "URL of the thumbnail linked to the artist's profile."
+          example: "https://example.com/images/rihanna.png"
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifier of an artist's album."
+          example: album-5oadlaqhGgbbKwfb9MLm5b
+        name:
+          type: string
+          description: "Name of the artist's album."
+          example: "Loud"
+        artistId:
+          type: string
+          description: "Unique identifier of the artist's account who created this album."
+          example: artist-2xaclaqhGgbbKwfb9MLm0p
+        createdOn:
+          type: string
+          description: "Date and time of when the album was created by the artist."
+          format: date-time
+          example: "2022-08-24T14:01:54.05Z"          
+        tracksCount:
+          type: number
+          description: "Number of tracks in the album."
+          example: 11
+        tracks:
+          type: array
+          description: "Tracks in the album."
+          items:
+            $ref: "#/components/schemas/AlbumTrack"
+    AlbumTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+          description: "Unique identifier of the artist album's track."
+          example: track-78aclaqhFgbbKwfb9MLmTx
+        albumId:
+          type: string
+          description: "Unique identifier of the album in which the track exists."
+          example: album-2rqhFgbbKwfb9MLmUQDhzY
+        title:
+          type: string
+          description: "Title of the track."
+          example: "What's My Name?"
+        addedBy:
+          type: string
+          description: "Unique identifier of the artist who added the track to the album."
+          example: artist-6rqhFgbbKwnb9MLmUQDhG6
+        addedOn:
+          type: string
+          format: date-time
+          description: "Date and time of when the artist added the track to the album."
+          example: "2022-08-24T15:01:54.05Z"
+        track:
+          $ref: "#/components/schemas/Track"
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifier of a track."
+          example: track-78aclaqhFgbbKwfb9MLmTx
+        title:
+          type: string
+          description: "Title of the track."
+          example: "What's My Name?"
+        duration:
+          type: number
+          description: "Time in seconds"
+          format: int64 
+          example: 267 
+        artist:
+          $ref: "#/components/schemas/Artist"                      
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: "Error code."
+          example: 2
+        message:
+          type: string
+          description: "User-friendly message associated with the error."
+          example: "Playlist with id not found"
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://musicplay.io/api/oauth/authorize
+          tokenUrl: https://musicplay.io/api/oauth/token
+          scopes:
+            write:user: modify user profile in your account
+            read:user: read user profile
+            write:playlist: modify user playlist
+            read:playlist: read user playlist
+            write:playlist-track: modify user playlist track
+            read:playlist-track: read user playlist track

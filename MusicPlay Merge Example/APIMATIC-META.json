@@ -1,0 +1,11 @@
+{
+    "MergeConfiguration": {
+        "MergeApis": true,
+        "MergeOrderOfDirectories": ["User API", "Library API"],
+        "MergedApiName": "MusicPlay API",
+        "MergeSettings": {
+            "ConflictStrategy": "KeepLeft",
+            "DescriptionConflictStrategy": "KeepBoth"
+        }
+    }
+}

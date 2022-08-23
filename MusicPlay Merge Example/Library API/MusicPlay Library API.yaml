@@ -1,0 +1,419 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: MusicPlay Library API
+  description: Provides data related to the MusicPlay library including artists, tracks, etc.
+servers:
+  - url: https://musicplay.io/api/v1/library
+security:
+  - oauth2: []
+paths:
+  /search:
+    get:
+      summary: Search library artists or tracks.
+      operationId: searchLibrary
+      parameters:
+      - name: searchQuery
+        in: query
+        description: Search query e.g. name of an artist, album or track.
+        required: true
+        schema:
+          type: string
+          example: Celine Dion 
+      - name: types
+        in: query
+        description: Comma-separated type filter. If specified, only components of this type will be retrieved by the search.
+        required: false
+        schema:
+          type: string
+          example: "track, album"
+      tags:
+        - library
+      responses:
+        '200':
+          description: Search results.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+  /artists/{artist-id}:
+    parameters:
+    - $ref: "#/components/parameters/artist-id"
+    get:
+      summary: Get artist's profile.
+      operationId: getArtist
+      security:
+        - oauth2: ["read:artist"]
+      tags:
+        - artist
+      responses:
+        '200':
+          description: Artist object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Artist"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    put:
+      summary: Update artist's profile.
+      operationId: updateArtist
+      security:
+        - oauth2: ["write:artist"]
+      tags:
+        - artist
+      parameters:
+        - name: name
+          in: query
+          description: "Name of the artist."
+          required: false
+          schema:
+            type: string
+            example: Rihanna
+        - name: bio
+          in: query
+          description: "Introductory bio of the artist."
+          required: false
+          schema:
+            type: string
+            example: "Robyn Rihanna Fenty NH (born 20 February 1988) is a Barbadian singer, songwriter, actress and businesswoman."
+        - name: profilePictureUrl
+          in: query
+          description: "URL for the thumbnail to associate with the artist's profile."
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Profile updated successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"               
+  /artists/{artist-id}/albums:
+    parameters:
+    - $ref: "#/components/parameters/artist-id"
+    get:
+      summary: Get albums associated with the artist's account.
+      operationId: getArtistAlbums
+      security:
+        - oauth2: ["read:artist"]      
+      tags:
+        - albums
+      responses:
+        '200':
+          description: List of artist's album objects.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Album"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    post:
+      summary: Add new album to artist's profile.
+      operationId: addArtistAlbum
+      security:
+        - oauth2: ["write:artist"]      
+      tags:
+        - albums
+      requestBody:
+        content: 
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Album'
+      responses:
+        '200':
+          description: Artist's album added successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"
+  /albums/{album-id}:
+    parameters:
+    - $ref: "#/components/parameters/album-id"
+    get:
+      summary: Get album's metadata.
+      operationId: getAlbum
+      security:
+        - oauth2: ["read:album"]      
+      tags:
+        - albums
+      responses:
+        '200':
+          description: Album object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Album"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    delete:
+      summary: Delete an album.
+      operationId: deleteAlbum
+      security:
+        - oauth2: ["write:album"]      
+      tags:
+        - albums  
+      responses:
+        '200':
+          description: Album deleted successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"             
+  /albums/{album-id}/tracks:
+    parameters:
+    - $ref: "#/components/parameters/album-id" 
+    get:
+      summary: Get tracks associated with an artist's album.
+      operationId: getAlbumTracks
+      security:
+        - oauth2: ["read:album"]      
+      tags:
+        - album tracks
+      responses:
+        '200':
+          description: List of album tracks.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlbumTrack"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    post:
+      summary: Add a new album track.
+      operationId: addAlbumTrack
+      security:
+        - oauth2: ["write:album"]          
+      tags:
+        - album tracks
+      requestBody:
+        content: 
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/AlbumTrack'
+      responses:
+        '200':
+          description: Track added successfully to the album.
+        default:
+          $ref: "#/components/responses/defaultResponse"              
+  /tracks/{track-id}:
+    parameters:
+    - $ref: "#/components/parameters/track-id"
+    get:
+      summary: Get track info.
+      operationId: getTrack
+      security:
+        - oauth2: ["read:track"]      
+      tags:
+        - track
+      responses:
+        '200':
+          description: Track object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Track"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+    delete:
+      summary: Delete the track.
+      operationId: deleteTrack
+      security:
+        - oauth2: ["write:track"]          
+      tags:
+        - track
+      responses:
+        '200':
+          description: Track deleted successfully.
+        default:
+          $ref: "#/components/responses/defaultResponse"                              
+components:
+  parameters:
+    artist-id:
+      name: artist-id
+      in: path
+      description: Unique id that identifies an artist's account on MusicPlay application.
+      required: true
+      schema:
+        type: string
+        example: artist-6rqhFgbbKwnb9MLmUQDhG6
+    album-id:
+      name: album-id
+      in: path
+      description: Unique id that identifies an album on the artist's account.
+      required: true
+      schema:
+        type: string
+        example: album-2rqhFgbbKwfb9MLmUQDhzY  
+    track-id:
+      name: track-id
+      in: path
+      description: Unique id that identifies a track in an artist's album.
+      required: true
+      schema:
+        type: string
+        example: track-78aclaqhFgbbKwfb9MLmTx
+  responses:
+    defaultResponse:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"     
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "Title of the retrieved library component."
+        id:
+          type: string
+          description: "Unique identifier of the retrieved library component. This could be an artist's unique id, track's unique id or an album's unique id."
+        type:
+          $ref: "#/components/schemas/LibraryComponentType"
+        album:
+          $ref: "#/components/schemas/Album"
+        artist:
+          $ref: "#/components/schemas/Artist"
+        track:
+          $ref: "#/components/schemas/Track"
+    LibraryComponentType:
+      type: string
+      enum:
+        - Artist
+        - Album
+        - Track
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifer of the artist account."
+          example: artist-2xaclaqhGgbbKwfb9MLm0p
+        name:
+          type: string
+          description: "Name of the artist."
+          example: Rihanna
+        bio:
+          type: string
+          description: "Introductory bio of the artist."
+          example: "Robyn Rihanna Fenty NH (born 20 February 1988) is a Barbadian singer, songwriter, actress and businesswoman."          
+        albumsCount:
+          type: number
+          description: "Number of albums added by the artist."
+          example: 11
+        albums:
+          type: array
+          description: "Albums added by the artist."
+          items:
+            $ref: "#/components/schemas/Album"
+        profilePictureUrl:
+          type: string
+          description: "URL of the thumbnail linked to the artist's profile."
+          example: "https://example.com/images/rihanna.png"
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifier of an artist's album."
+          example: album-5oadlaqhGgbbKwfb9MLm5b
+        name:
+          type: string
+          description: "Name of the artist's album."
+          example: "Loud"
+        artistId:
+          type: string
+          description: "Unique identifier of the artist's account who created this album."
+          example: artist-2xaclaqhGgbbKwfb9MLm0p
+        createdOn:
+          type: string
+          description: "Date and time of when the album was created by the artist."
+          format: date-time
+          example: "2022-08-24T14:01:54.05Z"          
+        tracksCount:
+          type: number
+          description: "Number of tracks in the album."
+          example: 11
+        tracks:
+          type: array
+          description: "Tracks in the album."
+          items:
+            $ref: "#/components/schemas/AlbumTrack"        
+    AlbumTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+          description: "Unique identifier of the artist album's track."
+          example: track-78aclaqhFgbbKwfb9MLmTx
+        albumId:
+          type: string
+          description: "Unique identifier of the album in which the track exists."
+          example: album-2rqhFgbbKwfb9MLmUQDhzY
+        title:
+          type: string
+          description: "Title of the track."
+          example: "What's My Name?"
+        addedBy:
+          type: string
+          description: "Unique identifier of the artist who added the track to the album."
+          example: artist-6rqhFgbbKwnb9MLmUQDhG6
+        addedOn:
+          type: string
+          format: date-time
+          description: "Date and time of when the artist added the track to the album."
+          example: "2022-08-24T15:01:54.05Z"
+        track:
+          $ref: "#/components/schemas/Track"
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Unique identifier of a track."
+          example: track-78aclaqhFgbbKwfb9MLmTx
+        title:
+          type: string
+          description: "Title of the track."
+          example: "What's My Name?"
+        duration:
+          type: number
+          description: "Time in seconds"
+          format: int64 
+          example: 267 
+        artist:
+          $ref: "#/components/schemas/Artist"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: "Error code."
+          example: 2
+        message:
+          type: string
+          description: "Artist-friendly message associated with the error."
+          example: "Album with id not found"
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://musicplay.io/api/oauth/authorize
+          tokenUrl: https://musicplay.io/api/oauth/token
+          scopes:
+            write:artist: modify artist profile
+            read:artist: read artist profile
+            write:album: modify artist album   
+            read:album: read artist album
+            write:track: modify track details
+            read:track: read track details
