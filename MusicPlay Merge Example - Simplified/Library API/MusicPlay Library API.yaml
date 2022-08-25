@@ -1,0 +1,147 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: MusicPlay Library API
+  description: Provides data related to the MusicPlay library including artists, tracks, etc.
+servers:
+  - url: https://musicplay.io/api/v1/library
+security:
+  - oauth2: []
+paths:
+  /search:
+    get:
+      operationId: searchLibrary
+      parameters:
+      - name: searchQuery
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: types
+        in: query
+        schema:
+          type: string
+      tags:
+        - library
+      responses:
+        '200':
+          description: Search results.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+        default:
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"  
+components:
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        title:
+          type: string
+        id:
+          type: string
+        type:
+          $ref: "#/components/schemas/LibraryComponentType"
+        album:
+          $ref: "#/components/schemas/Album"
+        artist:
+          $ref: "#/components/schemas/Artist"
+        track:
+          $ref: "#/components/schemas/Track"
+    LibraryComponentType:
+      type: string
+      enum:
+        - Artist
+        - Album
+        - Track
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        bio:
+          type: string
+        albums:
+          type: array
+          items:
+            $ref: "#/components/schemas/Album"
+        profilePictureUrl:
+          type: string
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        artistId:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumTrack"        
+    AlbumTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+        albumId:
+          type: string
+        title:
+          type: string
+        addedBy:
+          type: string
+        addedOn:
+          type: string
+          format: date-time
+        track:
+          $ref: "#/components/schemas/Track"
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        duration:
+          type: number
+          format: int64 
+        artist:
+          $ref: "#/components/schemas/Artist"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://musicplay.io/api/oauth/authorize
+          tokenUrl: https://musicplay.io/api/oauth/token
+          scopes:
+            write:artist: modify artist profile
+            read:artist: read artist profile
+            write:album: modify artist album   
+            read:album: read artist album
+            write:track: modify track details
+            read:track: read track details

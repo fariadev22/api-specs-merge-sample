@@ -1,0 +1,197 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: MusicPlay User API
+  description: Helps manage user accounts on the MusicPlay application.
+servers:
+  - url: https://musicplay.io/api/v1/users
+security:
+  - oauth2: []
+paths:
+  /:
+    get:
+      operationId: getAllUsers
+      security:
+        - oauth2: ["read:user"]
+      tags:
+        - users
+        - internal
+      responses:
+        '200':
+          description: User profile object.
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+  /{user-id}:
+    parameters:
+    - name: user-id
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      operationId: getUserProfile
+      security:
+        - oauth2: ["read:user"]
+      tags:
+        - user profile
+      responses:
+        '200':
+          description: User profile object.
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        default:
+          $ref: "#/components/responses/defaultResponse"
+components:
+  responses:
+    defaultResponse:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"   
+  schemas:
+    UserProfile:
+      type: object
+      properties:        
+        id:
+          type: string
+        name:
+          type: string
+        joined:
+          type: string
+          format: date-time
+        bio:
+          type: string
+        profilePictureUrl:
+          type: string
+        playlists:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserPlaylist"
+    UserPlaylist:
+      type: object
+      properties:      
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdBy:
+          type: string
+        createdOn:
+          type: string
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserPlaylistTrack"
+        isPublic:
+          type: boolean
+    UserPlaylistTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+        playlistId:
+          type: string
+        title:
+          type: string
+        addedBy:
+          type: string
+        addedOn:
+          type: string
+          format: date-time
+        track:
+          $ref: "#/components/schemas/Track"
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        bio:
+          type: string
+        albums:
+          type: array
+          items:
+            $ref: "#/components/schemas/Album"
+        profilePictureUrl:
+          type: string
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        artistId:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlbumTrack"
+    AlbumTrack:
+      type: object
+      properties:      
+        id:
+          type: string 
+        albumId:
+          type: string
+        title:
+          type: string
+        addedBy:
+          type: string
+        addedOn:
+          type: string
+          format: date-time
+        track:
+          $ref: "#/components/schemas/Track"
+    Track:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        duration:
+          type: number
+          format: int64 
+        artist:
+          $ref: "#/components/schemas/Artist"                      
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://musicplay.io/api/oauth/authorize
+          tokenUrl: https://musicplay.io/api/oauth/token
+          scopes:
+            write:user: modify user profile in your account
+            read:user: read user profile
+            write:playlist: modify user playlist
+            read:playlist: read user playlist
+            write:playlist-track: modify user playlist track
+            read:playlist-track: read user playlist track
