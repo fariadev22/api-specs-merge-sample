@@ -1,5 +1,5 @@
 # api-specs-merge-sample
-A repository that holds sample API specification documents used in my blog for illustrating the merging process using APIMatic.
+A repository that holds sample API specification documents used in [my blog](https://medium.com/apimatic/auto-merging-apis-and-microservices-specifications-to-ease-api-integration-fe18b5ba4e47) for illustrating the merging process using APIMatic.
 
 ## Contents
 The `MusicPlay Merge Example` directory contains all files needed to perform the merge. It is actually the parent directory that holds dedicated sub-directories for the two hypothetical API descriptions `Library API` and `User API`. In addition to that, it holds a Metadata configuration file `APIMATIC-META.json` to enable merging of the two API descriptions.
